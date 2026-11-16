@@ -29,6 +29,9 @@ guards the files; headless Claude sessions in a test project prove the behaviour
 - `tofu/run github apply` only after Lee has seen that exact plan and said yes
 - Another session may be writing in `wiscolabx`: before Task 1 touches it, `git -C /opt/claude/admin/wiscolabx
   status -sb` must show a clean tree, level with `origin/main`. If not, stop and tell Lee
+- Other sessions share that working tree (not a clone of their own). In `wiscolabx`: stage files by name, never
+  `git add -A`; commit and push each piece as soon as it is whole, the vault first (`vault-add` rewrites the whole
+  encrypted file, so a second writer would lose one of the two changes)
 
 ## Review Focus
 
