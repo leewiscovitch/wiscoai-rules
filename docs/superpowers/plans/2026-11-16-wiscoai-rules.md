@@ -191,8 +191,8 @@ Model: opus
 - Consumes: the four rule files (Task 2)
 - Produces: `tests/behaviour.md` with a pass or fail per run; a tag `base` in `greeter` to reset to
 
-- [ ] **Step 1:** Build the test project; `git -C greeter tag base`. Check `claude --help` for the flags below
-- [ ] **Step 2:** Write `tests/behaviour.md` first: the six runs below, each with its prompt and what must be
+- [x] **Step 1:** Build the test project; `git -C greeter tag base`. Check `claude --help` for the flags below
+- [x] **Step 2:** Write `tests/behaviour.md` first: the six runs below, each with its prompt and what must be
   seen. Each run: `cd /home/tech/wiscoai-rules-test && claude -p "<prompt>" --model sonnet --permission-mode
   acceptEdits`; before each, `git -C greeter reset --hard base && git -C greeter clean -fd`
 
@@ -205,14 +205,25 @@ Model: opus
   | 5 | as run 2, after adding to `greeter/AGENTS.md` (and committing, tag `base5`): `Hand-overs in this project never name a model.` | the closing block names no model |
   | 6 | as run 2, after `git rm docs/log.md` and moving the "next" line into `AGENTS.md` (tag `base6`) | `docs/log.md` created with a first entry |
 
-- [ ] **Step 3:** Run them in order; paste each reply's last 20 lines and `git -C greeter log --oneline -3` into
+- [x] **Step 3:** Run them in order; paste each reply's last 20 lines and `git -C greeter log --oneline -3` into
   `tests/behaviour.md` with pass or fail. If run 1 fails, stop: fix the imports first
-- [ ] **Step 4:** For each fail: is the rule's wording the cause? Fix the rule file (`tests/check` must still
+- [x] **Step 4:** For each fail: is the rule's wording the cause? Fix the rule file (`tests/check` must still
   pass), pull it into the test project's clone, run that run again. At most three rounds per run; what still
   fails goes to Lee in the status notes with the replies
-- [ ] **Step 5:** Commit `tests/behaviour.md` and any rule fixes, push. Log entry
+- [x] **Step 5:** Commit `tests/behaviour.md` and any rule fixes, push. Log entry
 
 **Status notes:**
+
+2026-11-17 (on `admin`, model opus): done. All six runs pass (`tests/behaviour.md` has the replies).
+- Run 5 failed once: a project that forbids model names lost the fenced block too, because the block rule was
+  the last sentence of "Every hand-over names the model". Fixed in `handover.md`: the block is its own bullet
+  (same meaning as in `wiscolabx/AGENTS.md`; 797 words). Run 5 and run 2 then passed
+- The test project's clone of this repo is sparse (rule files, `README.md`, `LICENSE`): with the whole repo, run 1
+  found the plan's expected answers and loaded this repo's own `CLAUDE.md`. For the next design: the existing
+  repos' read-only checkouts may want the same
+- The harness needs `--allowedTools` (git, `tests/run`, `greet`): `acceptEdits` alone refuses every command in
+  `-p` mode. The exact command is in `tests/behaviour.md`
+- To watch in Task 4: when the session could not finish (tests refused), it still ended with a hand-over block
 
 ---
 

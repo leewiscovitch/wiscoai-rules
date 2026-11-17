@@ -2,6 +2,18 @@
 
 Newest first. Each entry: what was done, what's next (where, which model).
 
+## 2026-11-17: the behaviour runs
+
+Done (plan Task 3, on `admin`, model opus):
+- The test project `/home/tech/wiscoai-rules-test/` (`greeter`, a sparse clone of this repo, a `CLAUDE.md` that
+  imports the rules) and `tests/behaviour.md`: six headless runs, how they are done, the replies. All six pass
+- `handover.md`: the fenced closing line is its own bullet (run 5: a project that forbade model names lost the
+  block with them)
+- What is open for the trial is at the end of `tests/behaviour.md` and in the plan's Task 3 status notes
+
+Next: plan Task 4 (Lee tries it; the findings are fixed), Lee's session on `admin` first, then a fresh session on
+`admin`, model sonnet.
+
 ## 2026-11-17: the rules
 
 Done (plan Task 2, on `admin`, model opus):
