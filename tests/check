@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Checks the rule files: they exist, name nothing of one project, stay short, and keep the rules they carry.
+# Run from anywhere: tests/check. Exits 0 when everything holds; otherwise names each miss and exits 1.
+set -u
+cd "$(dirname "$0")/.." || exit 1
+
+rules=(sessions.md handover.md models.md working.md)
+fail=0
+miss() { echo "MISS: $*"; fail=1; }
+
+# 1. The files exist
+for f in "${rules[@]}" README.md LICENSE; do
+  [ -f "$f" ] || miss "$f does not exist"
+done
+
+# 2. Nothing lab-specific in a rule file (case-sensitive). Words as whole words; address prefixes as text.
+words='Lee|wiscolabx|wisco[a-z0-9]+|tofu|[Aa]nsible|Proxmox|admin'
+texts='10\.42\.|192\.168\.'
+for f in "${rules[@]}"; do
+  [ -f "$f" ] || continue
+  grep -nwE "$words" "$f" | sed "s|^|MISS: $f names something lab-specific: |" | grep . && fail=1
+  grep -nE "$texts" "$f" | sed "s|^|MISS: $f names a lab address: |" | grep . && fail=1
+done
+
+# 3. At most 800 words, the four files together
+present=()
+for f in "${rules[@]}"; do [ -f "$f" ] && present+=("$f"); done
+if [ "${#present[@]}" -gt 0 ]; then
+  n=$(cat "${present[@]}" | wc -w)
+  [ "$n" -le 800 ] || miss "the rule files hold $n words (at most 800)"
+fi
+
+# 4. Each rule is still in its file
+check() {
+  local f=$1; shift
+  [ -f "$f" ] || return 0
+  for p in "$@"; do
+    grep -qiF -- "$p" "$f" || miss "$f lacks: $p"
+  done
+}
+check sessions.md 'The repo is the memory' 'newest three entries' 'Fresh sessions over long ones' \
+  'One writer at a time' 'new entry at the top' 'Force-push'
+check handover.md 'Every hand-over names the model' 'fenced code block' 'A question or a hand-over, never both' \
+  'say so and stop'
+check models.md 'A model per task' 'Model: sonnet|opus|fable' 'One model per session' 'only where they pay'
+check working.md 'Automate, and explain' 'comes with its commands' 'The CLI comes first' 'drift' \
+  'secrets in plain text'
+
+if [ "$fail" -eq 0 ]; then
+  echo "OK: the rule files hold (${n:-0} words)"
+fi
+exit "$fail"

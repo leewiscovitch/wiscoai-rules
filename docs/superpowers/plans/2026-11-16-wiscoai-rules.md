@@ -109,7 +109,7 @@ Model: opus
 **Interfaces:**
 - Produces: the four rule files at the root; `tests/check` exits 0 when they hold
 
-- [ ] **Step 1: Write `tests/check`** (fails now: no files). It exits non-zero, naming each miss, unless:
+- [x] **Step 1: Write `tests/check`** (fails now: no files). It exits non-zero, naming each miss, unless:
   - all four rule files, `README.md` and `LICENSE` exist
   - no rule file matches (case-sensitive, whole word where it is a word):
     `Lee|wiscolabx|wisco[a-z0-9]+|10\.42\.|192\.168\.|tofu|[Aa]nsible|Proxmox|\badmin\b`
@@ -123,8 +123,8 @@ Model: opus
   | `models.md` | `A model per task`, `Model: sonnet\|opus\|fable`, `One model per session`, `only where they pay` |
   | `working.md` | `Automate, and explain`, `comes with its commands`, `The CLI comes first`, `drift`, `secrets in plain text` |
 
-- [ ] **Step 2:** Run `tests/check`. Expected: non-zero, every file named as missing
-- [ ] **Step 3: Write the four rule files.** Each starts with a `#` title and one line saying what the topic
+- [x] **Step 2:** Run `tests/check`. Expected: non-zero, every file named as missing
+- [x] **Step 3: Write the four rule files.** Each starts with a `#` title and one line saying what the topic
   covers. Source passages in `wiscolabx/AGENTS.md`:
   - `sessions.md`: "Where things are" (the `docs/log.md` line only); "Working rules": the repo is the memory,
     fresh sessions over long ones, one writer at a time; "Before every commit": the last line (small commits)
@@ -138,20 +138,39 @@ Model: opus
 
   The log's path is "the project's log (`docs/log.md` unless the project says otherwise)". The owner is "the
   owner (named in the project's own file)"
-- [ ] **Step 4: Write `README.md`:** what this is (three lines); "Use it": check it out beside the project, the
+- [x] **Step 4: Write `README.md`:** what this is (three lines); "Use it": check it out beside the project, the
   five import lines from the spec; "What your project's own file must say": the owner's name, the log's path if
   not `docs/log.md`, the places work runs if more than one; "Your project's file wins where the two differ";
   "Updating": users follow `main`, a running session keeps what it loaded
-- [ ] **Step 5: Write this repo's own `AGENTS.md`** (at most 25 lines): the owner is Lee; what the repo is; a
+- [x] **Step 5: Write this repo's own `AGENTS.md`** (at most 25 lines): the owner is Lee; what the repo is; a
   rule change is checked with `tests/check` and against `wiscolabx/AGENTS.md` until that repo is moved onto
   these files; `docs/log.md` with its first entry
-- [ ] **Step 6:** Run `tests/check`. Expected: exit 0
-- [ ] **Step 7:** Read the four files against the source once more, rule by rule: every rule of the listed
+- [x] **Step 6:** Run `tests/check`. Expected: exit 0
+- [x] **Step 7:** Read the four files against the source once more, rule by rule: every rule of the listed
   passages is in exactly one file, none is changed in meaning. List what was left out, and why, in the status
   notes
-- [ ] **Step 8:** Commit (`The rules: sessions, hand-overs, models, working`), push
+- [x] **Step 8:** Commit (`The rules: sessions, hand-overs, models, working`), push
 
 **Status notes:**
+
+Done 2026-11-17 on `admin`, model opus. `tests/check` exits 0; the four files hold 797 words. A negative test (a
+line with `Lee`, `tofu`, `admin`, `10.42.`, `wiscopronode1`, `Ansible` added to `working.md`) was caught; `OpenTofu`
+and `administrator` were not, as meant.
+- `tests/check` greps the lab words with `-w` (whole words) and the address prefixes without it (`-w` would miss
+  `10.42.10.11`: the `.` is followed by a digit)
+- Read against the source rule by rule: every rule of the listed passages is in one file, meaning kept. Changed
+  only as the plan says: "Lee" → "the owner"; `docs/log.md` → "the log"; the lab's examples neutral ("the switch,
+  the routers or the cluster, renumbering" → "running systems, migrations"; "routine `site.yml` runs" → "routine
+  runs"; "playbooks" → "the code in the repo (scripts, playbooks, config)"; "a decrypted vault, a rendered answer
+  file or an ISO" → "a file with its secrets decrypted or filled in"; `ssh tech@<ip>` → `ssh user@host`;
+  "Proxmox included" and "(`reference.md`, `network.md`)" dropped)
+- Left out of the listed passages: "This is a learning project." (true of the lab, not of every project; a project
+  that is one says so in its own file)
+- One addition, for Review Focus "a rule that names something the project lacks": "No log yet: the session's
+  closing entry creates it." (`sessions.md`, nine words)
+- Not in the listed passages, so not moved (lab-specific): naming, addresses, logins, the Windows laptop's elevated
+  prompts, idempotent playbooks, the Claude Code unit, the install stick, the old repo. The laptop's "mark what
+  needs an elevated prompt" could be general later
 
 ---
 
