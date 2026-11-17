@@ -2,6 +2,14 @@
 
 Newest first. Each entry: what was done, what's next (where, which model).
 
+## 2026-11-17: a question to discuss, the session-end full run
+
+Done: Lee's question noted in the plan's Task 4 status notes ("Open, to discuss"): keep the full run at the end of
+every session, or move it to a nightly CI/CD run and fix what breaks the next day. Nothing decided, no rule changed.
+
+Next: unchanged, plan Task 4 (Lee's trial on `admin`, then a fresh session on `admin`, model sonnet); the question
+goes to the next design (model fable).
+
 ## 2026-11-17: the behaviour runs
 
 Done (plan Task 3, on `admin`, model opus):

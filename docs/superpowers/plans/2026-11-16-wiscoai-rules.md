@@ -257,3 +257,13 @@ Model: sonnet
 Open before the trial (added 2026-11-17): Lee asks whether the label the desktop app shows on the hand-over code
 block can be set by the rule, and how freely (now the app guesses one). Try the fence's info string in the trial;
 details in `tests/behaviour.md`, "Open, for Lee's trial".
+
+Open, to discuss (added 2026-11-17, not part of the trial): the full check at the end of every session. Today
+`wiscolabx/AGENTS.md` ("Running Ansible") asks for one full run (`changed=0`) plus `ansible-lint` before a
+session closes; these rule files say nothing about it yet. Lee's question: should sessions do it at all, or should a
+nightly CI/CD run do it, and whatever breaks is fixed the next day? His reasoning: as the setup settles, a session's
+edits touch less, and even those tasks should be quick, so the full run costs more per session than it catches.
+To weigh: the time spent fixing breakage in the session that caused it (fresh context, small diff) against fixing it
+all at once the next morning (one session, but finding which change broke what); what a session must still check
+before it pushes (the tagged dry run, lint) if the full run goes; where the nightly run lives and how its result
+reaches Lee. Decide in the next design (model fable); if it becomes a rule, it goes into `working.md`.
