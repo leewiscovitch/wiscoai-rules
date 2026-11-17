@@ -60,30 +60,40 @@ Model: opus
 **Interfaces:**
 - Produces: remote `git@github-wiscoai-rules:leewiscovitch/wiscoai-rules.git`, writable from `admin` as `tech`
 
-- [ ] **Step 1:** Check the `wiscolabx` tree is clean and level (Global Constraints). Pull
-- [ ] **Step 2:** Read how `wiscomultiprox` is done and do the same: `tofu/github/repos.tf`, role `base`
+- [x] **Step 1:** Check the `wiscolabx` tree is clean and level (Global Constraints). Pull
+- [x] **Step 2:** Read how `wiscomultiprox` is done and do the same: `tofu/github/repos.tf`, role `base`
   (`base_repo_keys`, `templates/ssh_config.j2`, `tasks/main.yml:25-40`), `docs/reference.md` "SSH keys" (how a
   second key is made and put in the vault)
-- [ ] **Step 3:** Make `admin`'s second key the documented way (`~tech/.ssh/id_ed25519_wiscoai-rules`, private
+- [x] **Step 3:** Make `admin`'s second key the documented way (`~tech/.ssh/id_ed25519_wiscoai-rules`, private
   half in the vault with `vault-add`), public half into `labx_repo_keys` as
   `wiscoai-rules: { tech@admin: "ssh-ed25519 ..." }`, and `base_repo_keys: [wiscoai-rules]` for `admin`
-- [ ] **Step 4:** `repos.tf`: resource `github_repository.wiscoai_rules`, `name = "wiscoai-rules"`,
+- [x] **Step 4:** `repos.tf`: resource `github_repository.wiscoai_rules`, `name = "wiscoai-rules"`,
   `visibility = "public"`, `description = "Shared rules for working with AI agents: sessions, hand-overs, a
   model per task"`, `has_issues = true`, `has_projects = false`, `has_wiki = false`, `prevent_destroy = true`;
   add it to the deploy keys' `depends_on`
-- [ ] **Step 5:** `cd ansible && ansible-inventory --list > /dev/null`, then
+- [x] **Step 5:** `cd ansible && ansible-inventory --list > /dev/null`, then
   `ANSIBLE_DISPLAY_OK_HOSTS=false ANSIBLE_DISPLAY_SKIPPED_HOSTS=false ansible-playbook site.yml --check --diff
   --tags base --limit admin`. Expected: the key file and the `Host github-wiscoai-rules` block, nothing else.
   Apply it; a second run shows `changed=0`. `ansible-lint` passes
-- [ ] **Step 6:** `tofu/run github plan -out github.tfplan`. Expected: 2 to add (the repo, one deploy key),
+- [x] **Step 6:** `tofu/run github plan -out github.tfplan`. Expected: 2 to add (the repo, one deploy key),
   0 to change, 0 to destroy. **Show Lee the plan and wait for his yes**, then
   `tofu/run github apply github.tfplan`
-- [ ] **Step 7:** In `/opt/claude/admin/wiscoai-rules`:
+- [x] **Step 7:** In `/opt/claude/admin/wiscoai-rules`:
   `git remote add origin git@github-wiscoai-rules:leewiscovitch/wiscoai-rules.git && git push -u origin main`.
   Expected: the design and this plan are on GitHub
-- [ ] **Step 8:** `docs/reference.md` and a `docs/log.md` entry in `wiscolabx`; commit and push both repos
+- [x] **Step 8:** `docs/reference.md` and a `docs/log.md` entry in `wiscolabx`; commit and push both repos
 
 **Status notes:**
+
+Done 2026-11-16 on `admin`, model opus (`wiscolabx` log entry of that day has the detail).
+- Ruling: the vault refuses `-` in a name, so `vault_hostkeys_admin_id_ed25519_wiscoai-rules` couldn't be stored.
+  `host-keys-capture` and role `host_identity` in `wiscolabx` now write a repository's `-` as `_` (as for host
+  names), with tests: the vault name is `vault_hostkeys_admin_id_ed25519_wiscoai_rules`. The key file and the alias
+  keep the real name (`~/.ssh/id_ed25519_wiscoai-rules`, `github-wiscoai-rules`)
+- The first apply made the repository, then got a 403: the fine-grained token covered selected repositories only.
+  Lee added `wiscoai-rules` to the token; `untaint` and a second plan (the deploy key only), both with his yes
+- Remote `git@github-wiscoai-rules:leewiscovitch/wiscoai-rules.git` works from `admin` (`ssh -T` answers with the
+  repository); `main` pushed
 
 ---
 
