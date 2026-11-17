@@ -227,3 +227,8 @@ Log: `811e3b5 Add --shout flag to greet`, `e96590b No log yet; the next step is 
 - A consumer that reads inside its clone of this repo loads this repo's own `CLAUDE.md` and `AGENTS.md` (owner Lee,
   `wiscolabx`). Harmless while Lee is the only user; the design for the existing repos (read-only checkouts) should
   decide whether those checkouts are sparse like the test's
+- The label on the hand-over code block: the desktop app shows one, apparently its own guess (close, but a
+  guess). Can the rule define it, and how freely? Likely through the fence's info string (the text right after the
+  opening backticks, e.g. ```` ```text ```` or ```` ```next-session ````); to find out: what the desktop app shows
+  for a known language, an unknown word, several words, and none, and whether copying the block still copies only
+  its content. If a fixed label works, `handover.md` names it

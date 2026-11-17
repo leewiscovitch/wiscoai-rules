@@ -253,3 +253,7 @@ Model: sonnet
   up to date), as sketched in the conversation of 2026-11-16
 
 **Status notes:**
+
+Open before the trial (added 2026-11-17): Lee asks whether the label the desktop app shows on the hand-over code
+block can be set by the rule, and how freely (now the app guesses one). Try the fence's info string in the trial;
+details in `tests/behaviour.md`, "Open, for Lee's trial".
