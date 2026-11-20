@@ -2,6 +2,23 @@
 
 Newest first. Each entry: what was done, what's next (where, which model).
 
+## 2026-11-20: `memory.md`, behaviour run 7
+
+Done (`wiscolabx` plan `2026-11-20-shared-rules-memory.md` Task 2, on `admin`, model opus):
+- `memory.md`, the fifth rule file: a note is for how the owner works (a correction, a standing preference), one
+  fact with its date, who and why; the project's facts and never a secret stay out; the notes are shared through
+  git, a conflict is told to the owner; on a review each note is promoted or deleted, with a yes per note
+- `sessions.md`: "The repo is the memory **for the work**", the notes only for how the owner works. `handover.md`:
+  "**Every** closing message ends with that line ... also when nothing is planned next or the project changes what
+  the line holds" (run 5 failed twice without it; the same meaning as `wiscolabx/AGENTS.md`, said harder).
+  `tests/check`: five files, at most 1000 words (exactly 1000 now: any addition needs a cut or a new limit).
+  `README.md`: the table row, the import, "Sharing the notes between machines" with a settings snippet
+- Behaviour run 7 (a correction and a project fact in one prompt) passes; runs 1–6 again: all pass, run 5 after
+  the fix (three rounds). Replies in `tests/behaviour.md`
+
+Next: plan Task 3 (the notes repo `wiscoai-memory`, its keys, its first content) in a fresh session on `admin`,
+model opus.
+
 ## 2026-11-20: the memory sync script
 
 Done (`wiscolabx` plan `2026-11-20-shared-rules-memory.md` Task 1, on `admin`, model opus):

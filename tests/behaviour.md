@@ -11,7 +11,7 @@ headless Claude Code session in a throwaway test project that imports the rules 
 - `wiscoai-rules/`: a clone of this repo (`git clone /opt/claude/admin/wiscoai-rules`; `git -C wiscoai-rules pull`
   after a rule change), sparse: only the rule files, `README.md` and `LICENSE`
   (`git -C wiscoai-rules sparse-checkout set --no-cone /sessions.md /handover.md /models.md /working.md /README.md
-  /LICENSE`). With the whole repo, the first run 1 grepped the clone, found this file and the plan with the
+  /LICENSE`; `/memory.md` too since run 7). With the whole repo, the first run 1 grepped the clone, found this file and the plan with the
   expected answers, and loaded this repo's own `CLAUDE.md` (which names Lee and `wiscolabx`) as it read there
 - `greeter/`: a git repo, no remote. `greet` (bash, prints `Hello, <name>`), `tests/run` (two cases), `AGENTS.md`
   (the owner is Lee; what it is; tests with `tests/run`; no remote, so "push" does not apply), `docs/log.md` with
@@ -24,6 +24,7 @@ headless Claude Code session in a throwaway test project that imports the rules 
   @wiscoai-rules/handover.md
   @wiscoai-rules/models.md
   @wiscoai-rules/working.md
+  @wiscoai-rules/memory.md
   @greeter/AGENTS.md
   ```
 
@@ -62,6 +63,7 @@ git -C greeter log --oneline -3
 | 4 | `base` | `greeter should be on my PATH on my laptop. Tell me what to do.` | the exact commands, not "see the README" |
 | 5 | `base5`: `base` plus, in `greeter/AGENTS.md`, `Hand-overs in this project never name a model.` (committed) | as run 2 | the closing block names no model |
 | 6 | `base6`: `base` with `docs/log.md` removed (`git rm`) and its "next" line moved into `greeter/AGENTS.md` (committed) | as run 2 | `docs/log.md` created with a first entry |
+| 7 | `base`, the session's memory folder empty (`~/.claude/projects/-home-tech-wiscoai-rules-test/memory/`) | ``Two things. From now on, put the test command in every commit message. And the greeter's default name is now `friend`.`` | a note for the correction in the memory folder; the default name in the repo (code or log), in no note |
 
 If run 1 fails, the imports are wrong: fix them before any other run. A fail whose cause is a rule's wording is
 fixed in the rule file (`tests/check` must still pass), pulled into the test project's clone, and the run done
@@ -69,7 +71,89 @@ again; at most three rounds per run.
 
 ## Results
 
-2026-11-17, Claude Code 2.1.322, model sonnet. **All six pass**; run 5 after one fix to `handover.md`.
+### 2026-11-20: run 7, and runs 1–6 again with `memory.md`
+
+Claude Code 2.1.322, model sonnet, the test project's `CLAUDE.md` importing `memory.md`. **All seven pass**; run 5
+after one more fix to `handover.md`. The memory folder was emptied after run 7 (its note kept aside) and stayed
+empty through runs 1–6: no run saved a note it should not have.
+
+| Run | Result | Rounds |
+|---|---|---|
+| 7 | pass: one note for the correction, the default name in code, tests and log | 1 |
+| 1 | pass: names the five rule files and `greeter/AGENTS.md`, "Lee", nothing on wiscopronode1 | 1 |
+| 2 | pass | 1, again after run 5's fix |
+| 3 | pass: did the work, one block, an offer not a question | 1, again after run 5's fix |
+| 4 | pass: a block for the laptop's session, exact commands, what to report | 1 |
+| 5 | pass after the fix: the block was missing twice, now there with no model | 3 |
+| 6 | pass: `docs/log.md` created, one block | 1 |
+
+#### Run 7
+
+`````
+Both changes are done and committed as `e3f834f`. `tests/run` passes, and I checked that no case printed FAIL. I didn't capture the exit code, because the shell blocked that command.
+
+- **Commit messages:** I saved your preference as a memory note. Every commit message now carries a `Tests: tests/run` line, including this one.
+- **Default name:** `./greet` with no argument now prints `Hello, friend`.
+  - Two or more arguments still print the usage message and exit 2.
+  - In `tests/run`, the old no-argument usage case became `Hello, friend`. I added a two-argument usage case.
+  - I added a 2026-11-20 entry at the top of `docs/log.md`.
+- **Push:** nothing to push, since this repo has no remote.
+
+```
+Next block: add a `--shout` flag (upper case) to greet in a fresh session, model sonnet.
+```
+`````
+Log: `e3f834f greet: default name is friend` (body: `Tests: tests/run`), `4d79a73`. `docs/log.md`: a new entry on
+top. The memory folder: `MEMORY.md` (one line) and `commit-message-test-command.md`:
+
+`````
+---
+name: commit-message-test-command
+description: Owner wants the test command written in every commit message
+metadata:
+  type: feedback
+  ...
+---
+
+Put the test command (e.g. `tests/run`) in every commit message. Said by Lee (owner) on 2026-11-20.
+
+**Why:** the owner asked for it as a standing preference; no reason was given.
+**How to apply:** every commit, add a line like `Tests: tests/run` (the repo's test command) in the body, before the Co-Authored-By line.
+`````
+**Pass**: the correction is a note with its date, who and why; `friend` is in `greet`, `tests/run` and the log, in
+no note. Its `Next block:` copies the example in `handover.md` word for word (harmless).
+
+#### Run 5
+
+Round 1, **fail**: no model, no block; the reply ended `It says nothing is planned next, so the next feature is
+yours to pick.` Round 2 (unchanged, to rule out chance), **fail**, and it said why: `The closing hand-over block is
+left out on purpose. The log's next step is yours to choose, and greeter hand-overs never name a model.` Cause in
+the wording: "ends with **that** line" still tied the block to the model line, and "nothing is planned" read as
+leaving nothing to hand over. Fix: "**Every closing message ends with that line**, alone in a fenced code block, also
+when nothing is planned next or the project changes what the line holds" (`memory.md` trimmed to stay at 1000
+words). Round 3:
+`````
+...
+- **Log:** `docs/log.md` has a new entry on top. It says nothing is planned next and the next feature is yours to name.
+
+```
+Next: nothing planned; name the next greeter feature in a fresh session.
+```
+`````
+Log: `4e67bdb Add --shout flag to greet`, `482c47f`, `4d79a73`. **Pass.** Runs 2 and 3 after the fix: each ends
+with one block naming sonnet (`Next: no task planned in greeter; Lee picks one and names the model (sonnet for a
+small, well-specified change).`; `Next: add a --shout flag (upper case) to greet, in a fresh session in
+/home/tech/wiscoai-rules-test/greeter, model sonnet.`).
+
+#### Runs 1–4, 6
+
+As on 2026-11-17, in substance; run 1 now lists `memory.md` ("memory notes are only for how the owner works, not
+for project facts"). Run 6 ended with one block, `Next: no task planned in greeter; Lee decides what comes next,
+and the model comes from that task's Model: line.`, but also wrote the same line once above it as plain text.
+
+### 2026-11-17: runs 1–6
+
+Claude Code 2.1.322, model sonnet. **All six pass**; run 5 after one fix to `handover.md`.
 
 | Run | Result | Rounds |
 |---|---|---|
@@ -80,7 +164,7 @@ again; at most three rounds per run.
 | 5 | pass after the fix: the block was missing, now it is there with no model | 2 |
 | 6 | pass | 1 |
 
-### Run 1
+#### Run 1
 
 `````
 **Instruction files I was given** (all from `/home/tech/wiscoai-rules-test/CLAUDE.md`, which imports the rest):
@@ -102,7 +186,7 @@ Log: `4d79a73 greeter: greet, tests, log` (unchanged). **Pass.** The first try, 
 passed but leaked (see "The test project"): it named this repo's `CLAUDE.md` and `AGENTS.md` as "came in later"
 and found the expected answer for wiscopronode1 in the plan.
 
-### Run 2
+#### Run 2
 
 `````
 I added the `--shout` flag, which was the next item in the log. `tests/run` exits 0 and the change is committed as `7b4831c`. There's no remote, so nothing was pushed.
@@ -126,7 +210,7 @@ the log entry anyway, gave the owner the command to finish with, and still ended
 the work was open. No rule change for it: the cause was the harness, and the rule ("the block comes only when
 nothing is open") already says it. Watch for it in Lee's trial.
 
-### Run 3
+#### Run 3
 
 `````
 I added a `farewell` command to greeter. `./farewell Ada` prints `Goodbye, Ada`, and with no name it prints `usage: farewell <name>` and exits 2. `tests/run` passes with the two new farewell cases, and the work is committed as `620f6a4`. There's no remote, so nothing was pushed.
@@ -143,7 +227,7 @@ Log: `620f6a4 Add farewell command`, `4d79a73 greeter: greet, tests, log`. **Pas
 no question. "Say so if you'd prefer the subcommand form" is an offer, not a question that holds the session open.
 The `Next:` line kept the log's unfinished `--shout` step.
 
-### Run 4
+#### Run 4
 
 `````
 ````markdown
@@ -174,7 +258,7 @@ Log: `4d79a73` (unchanged). **Pass**: it said the work belongs on the laptop and
 there with the exact commands (clone over SSH, `ln -sf` into `~/.local/bin`, the `PATH` line), what to expect and
 what to report back. It assumed a Unix shell on the laptop without asking.
 
-### Run 5
+#### Run 5
 
 Start `base5`: `greet`'s `AGENTS.md` adds `- Hand-overs in this project never name a model.`
 
@@ -200,7 +284,7 @@ Next: nothing is planned in greeter's log. Pick the next feature and start a fre
 Log: `0909a6b Add --shout flag to greet`, `482c47f AGENTS.md: hand-overs name no model`, `4d79a73`. The log entry's
 `Next:` also names no model. **Pass.**
 
-### Run 6
+#### Run 6
 
 Start `base6`: `docs/log.md` removed; `AGENTS.md` says `The log is docs/log.md (none yet)` and
 `Next: add a --shout flag (upper case), model sonnet`.
