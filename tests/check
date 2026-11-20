@@ -13,10 +13,11 @@ for f in "${rules[@]}" README.md LICENSE; do
   [ -f "$f" ] || miss "$f does not exist"
 done
 
-# 2. Nothing lab-specific in a rule file (case-sensitive). Words as whole words; address prefixes as text.
+# 2. Nothing lab-specific in a rule file or a hook script (case-sensitive). Words as whole words; address prefixes as
+#    text.
 words='Lee|wiscolabx|wisco[a-z0-9]+|tofu|[Aa]nsible|Proxmox|admin'
 texts='10\.42\.|192\.168\.'
-for f in "${rules[@]}"; do
+for f in "${rules[@]}" hooks/*; do
   [ -f "$f" ] || continue
   grep -nwE "$words" "$f" | sed "s|^|MISS: $f names something lab-specific: |" | grep . && fail=1
   grep -nE "$texts" "$f" | sed "s|^|MISS: $f names a lab address: |" | grep . && fail=1

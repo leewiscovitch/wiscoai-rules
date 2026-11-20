@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# Keeps a folder of Claude Code memory notes, a git clone, in step with its remote. Run as two session hooks:
+#   memory-sync start <memory-dir>   (SessionStart) commit what a session left, pull, push; then update the rules
+#   memory-sync end <memory-dir>     (SessionEnd)   commit, pull, push
+# Promises: exits 0 always; never slow (every network step under MEMORY_SYNC_TIMEOUT seconds, default 5); never
+# loses a note (no reset, no clean, no forced push: on a conflict the local commits stay and `start` prints one line
+# beginning "memory-sync: notes out of sync"). Nothing else on stdout: a hook's stdout goes into the session.
+set -u
+
+T=${MEMORY_SYNC_TIMEOUT:-5}
+export GIT_TERMINAL_PROMPT=0
+export GIT_SSH_COMMAND="ssh -o BatchMode=yes -o ConnectTimeout=$T"
+host=$(hostname -s 2>/dev/null || hostname)
+
+# A network step: the whole git command under timeout (DNS can hang as well as the connection), silent
+net() { timeout -k 1 "$T" git -C "$dir" "$@" >/dev/null 2>&1; }
+# A local step, silent
+g() { git -C "$dir" "$@" >/dev/null 2>&1; }
+
+# A rebase left by a run that was killed: abort it first (it restores the commits it was replaying)
+abort_rebase() {
+  if [ -d "$gitdir/rebase-merge" ] || [ -d "$gitdir/rebase-apply" ]; then
+    g rebase --abort
+  fi
+}
+
+# Everything in the folder is a note: commit it all, the host and the changed files as the message
+commit_all() {
+  [ -n "$(git -C "$dir" status --porcelain 2>/dev/null)" ] || return 0
+  g add -A || return 0
+  local files ident=()
+  files=$(git -C "$dir" diff --cached --name-only 2>/dev/null | paste -sd ' ' -)
+  [ -n "$files" ] || return 0
+  # A host with no git identity still commits, as the user on this host
+  git -C "$dir" config user.email >/dev/null 2>&1 || ident=(-c "user.name=${USER:-$(id -un)}" -c "user.email=${USER:-$(id -un)}@$host")
+  git -C "$dir" "${ident[@]}" -c commit.gpgsign=false commit -q --no-verify -m "$host: $files" >/dev/null 2>&1
+}
+
+# Fetch, replay the local commits on the remote's, push. Returns 1 on a conflict (rebase aborted, commits kept),
+# 2 when the remote can't be reached, 3 when the push failed after a fetch that worked, 0 otherwise
+sync() {
+  net fetch -q origin || return 2
+  if git -C "$dir" rev-parse -q --verify '@{upstream}' >/dev/null 2>&1; then
+    # The rebase is local and runs without a timeout, so a slow network can't leave it half done
+    if ! g -c core.editor=true rebase -q '@{upstream}'; then
+      g rebase --abort
+      return 1
+    fi
+    [ "$(git -C "$dir" rev-list --count '@{upstream}..HEAD' 2>/dev/null)" != 0 ] || return 0
+    net push -q origin HEAD || return 3
+  else
+    # A remote with nothing on it yet: the first push creates the branch
+    git -C "$dir" rev-parse -q --verify HEAD >/dev/null 2>&1 || return 0
+    net push -q -u origin HEAD || return 3
+  fi
+}
+
+# The rules repo this script lives in: fast-forward only, and only when nothing is being worked on in it
+update_rules() {
+  local rules rgit
+  rules=$(cd "$(dirname "$(readlink -f "$0")")/.." 2>/dev/null && pwd) || return 0
+  rgit=$(git -C "$rules" rev-parse --absolute-git-dir 2>/dev/null) || return 0
+  [ -z "$(git -C "$rules" status --porcelain 2>/dev/null)" ] || return 0
+  (
+    flock -n 8 || exit 0
+    timeout -k 1 "$T" git -C "$rules" pull -q --ff-only >/dev/null 2>&1
+  ) 8>"$rgit/memory-sync.lock"
+}
+
+main() {
+  local mode=${1:-} rc=0
+  dir=${2:-}
+  case $mode in start|end) ;; *) return 0 ;; esac
+
+  # Not a clone (yet): nothing to do, nothing created
+  if [ -n "$dir" ] && [ -e "$dir/.git" ] && gitdir=$(git -C "$dir" rev-parse --absolute-git-dir 2>/dev/null); then
+    # Up to four sessions share one clone: one run at a time; a second waits at most the timeout, then gives up
+    exec 9>"$gitdir/memory-sync.lock"
+    if flock -w "$T" 9; then
+      abort_rebase
+      commit_all
+      sync || rc=$?
+      # One retry when another host pushed between our fetch and our push
+      [ "$rc" -ne 3 ] || { rc=0; sync || rc=$?; }
+      if [ "$rc" -eq 1 ] && [ "$mode" = start ]; then
+        echo "memory-sync: notes out of sync on $host in $dir: the local notes are committed but conflict with" \
+          "the remote's; nothing was lost. Tell the owner; to merge by hand: git -C $dir pull --rebase"
+      fi
+    fi
+    exec 9>&-
+  fi
+
+  [ "$mode" = start ] && update_rules
+  return 0
+}
+
+main "$@"
+exit 0
