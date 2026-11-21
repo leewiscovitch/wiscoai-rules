@@ -2,6 +2,20 @@
 
 Newest first. Each entry: what was done, what's next (where, which model).
 
+## 2026-11-21: `working.md`: no hanging commands, no kill by name
+
+Done (on `admin`, model sonnet, after Lee reported two problems: `pkill` ending the Claude Code session, and
+scripts that hang until he asks for an update):
+- `working.md`: "Never let a command hang the session" (`timeout`, non-interactive flags, long waits in the
+  background with a deadline, never a slow call batched with a quick one, a status every 3-5 minutes, a step that
+  waits for the owner on purpose runs in the foreground). "Never": kill by name or pattern; only a recorded PID
+- The memory note `keep-tool-calls-short` is promoted into it and deleted
+- `tests/check`: limit 1000 -> 1200 words (the files hold 1175), the two new rules are checked. `AGENTS.md` too
+- Not done: the behaviour runs (`tests/`) were not repeated for the new rules
+
+Next: watch whether the two problems come back; if so, a behaviour run for them. Otherwise the plan's Task 4
+(promotion pass after `wiscolabx` Task 7) in a fresh session on `admin`, model sonnet.
+
 ## 2026-11-21: `wiscolabx` is moved onto these files
 
 Done (`wiscolabx` plan `2026-11-20-shared-rules-memory.md` Task 6, on `admin`, model opus): `wiscolabx/AGENTS.md`

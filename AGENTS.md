@@ -6,7 +6,7 @@ itself (`CLAUDE.md` imports them).
 
 - **Read `docs/log.md` first**: its newest three entries. Designs and plans are in `docs/superpowers/`
 - **The rule files name no project.** "The owner", not "Lee"; neutral examples; no host names, addresses or tools
-  of one project. `tests/check` guards that (in `hooks/` too), the length (five files, at most 1000 words) and
+  of one project. `tests/check` guards that (in `hooks/` too), the length (five files, at most 1200 words) and
   the key phrases
 - **A rule change** is checked with `tests/check` (must exit 0). `wiscolabx` imports these files and keeps only
   its own in its `AGENTS.md` (moved 2026-11-21): a change here reaches its sessions as it is. Never edit

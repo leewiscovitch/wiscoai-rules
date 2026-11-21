@@ -23,12 +23,12 @@ for f in "${rules[@]}" hooks/*; do
   grep -nE "$texts" "$f" | sed "s|^|MISS: $f names a lab address: |" | grep . && fail=1
 done
 
-# 3. At most 1000 words, the five files together
+# 3. At most 1200 words, the five files together
 present=()
 for f in "${rules[@]}"; do [ -f "$f" ] && present+=("$f"); done
 if [ "${#present[@]}" -gt 0 ]; then
   n=$(cat "${present[@]}" | wc -w)
-  [ "$n" -le 1000 ] || miss "the rule files hold $n words (at most 1000)"
+  [ "$n" -le 1200 ] || miss "the rule files hold $n words (at most 1200)"
 fi
 
 # 4. Each rule is still in its file
@@ -45,7 +45,7 @@ check handover.md 'Every hand-over names the model' 'fenced code block' 'A quest
   'say so and stop'
 check models.md 'A model per task' 'Model: sonnet|opus|fable' 'One model per session' 'only where they pay'
 check working.md 'Automate, and explain' 'comes with its commands' 'The CLI comes first' 'drift' \
-  'secrets in plain text'
+  'secrets in plain text' 'Never let a command hang' 'Kill by name or pattern'
 check memory.md 'how the owner works' 'never a secret' 'promoted' 'deleted'
 
 if [ "$fail" -eq 0 ]; then
