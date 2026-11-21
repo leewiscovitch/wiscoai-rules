@@ -2,6 +2,15 @@
 
 Newest first. Each entry: what was done, what's next (where, which model).
 
+## 2026-11-21: `wiscolabx` is moved onto these files
+
+Done (`wiscolabx` plan `2026-11-20-shared-rules-memory.md` Task 6, on `admin`, model opus): `wiscolabx/AGENTS.md`
+no longer repeats what the five files carry (compared passage by passage, no difference in meaning; a headless
+session answers as before). `AGENTS.md` here: a rule change is no longer read against `wiscolabx/AGENTS.md`.
+
+Next: `wiscolabx` plan Task 7 (Lee's trial, then the promotion pass; this repo's plan Task 4) in a fresh session on
+`admin`, model sonnet.
+
 ## 2026-11-21: `memory-sync start`: the new index lines, the rules in the background
 
 Done (`wiscolabx` plan `2026-11-20-shared-rules-memory.md` Task 4, Step 6, on `admin`, model opus). Seen live:

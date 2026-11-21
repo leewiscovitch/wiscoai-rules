@@ -8,8 +8,8 @@ itself (`CLAUDE.md` imports them).
 - **The rule files name no project.** "The owner", not "Lee"; neutral examples; no host names, addresses or tools
   of one project. `tests/check` guards that (in `hooks/` too), the length (five files, at most 1000 words) and
   the key phrases
-- **A rule change** is checked with `tests/check` (must exit 0) and read against `wiscolabx/AGENTS.md`, the rules'
-  source: the same point must mean the same in both, until that repo is moved onto these files. Never edit
+- **A rule change** is checked with `tests/check` (must exit 0). `wiscolabx` imports these files and keeps only
+  its own in its `AGENTS.md` (moved 2026-11-21): a change here reaches its sessions as it is. Never edit
   `wiscolabx` from here
 - **`hooks/memory-sync`** keeps a folder of memory notes (a git clone) in step between machines, as the
   `SessionStart` and `SessionEnd` hooks; on `start` it also prints the index lines its pull added and
