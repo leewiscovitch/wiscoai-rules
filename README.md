@@ -57,8 +57,10 @@ Claude Code keeps memory notes in a folder per project on each machine. To give 
 
 3. Import `memory.md`, so sessions know what belongs in a note.
 
-`start` commits what a session left, pulls and pushes, then fast-forwards this repo's clone if nothing is being
-worked on in it; `end` commits, pulls and pushes. Both always exit 0 and give up on the network after
+`start` commits what a session left, pulls and pushes, then fast-forwards this repo's clone in the background if
+nothing is being worked on in it; `end` commits, pulls and pushes. Claude Code reads `MEMORY.md` and the imported
+rules before the `SessionStart` hook has run, so `start` prints the lines its pull added to `MEMORY.md` (a hook's
+output reaches the session): a note from another machine is seen at once; a rules update, from the next session. Both always exit 0 and give up on the network after
 `MEMORY_SYNC_TIMEOUT` seconds (default 5): an offline machine starts as fast as ever and syncs next time. Nothing is
 ever reset or force-pushed; if two machines' notes conflict, the local ones stay committed and the next session is
 told one line starting `memory-sync: notes out of sync`. Point the setting at the clone only once the clone exists:

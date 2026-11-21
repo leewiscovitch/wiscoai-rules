@@ -58,6 +58,21 @@ t_travels() {
   [ "$(cat "$w/b/travel.md")" = 'from a' ] || fail "travel.md did not reach b"
 }
 
+# The session has read MEMORY.md before the start hook pulls: start prints the index lines the pull brought, so the
+# session sees a new note at once. Nothing when the pull brought no change to MEMORY.md (t_travels: quiet)
+t_new_index() {
+  echo 'from a' > "$w/a/new.md"
+  echo '- [New](new.md) - from a' >> "$w/a/MEMORY.md"
+  run end "$w/a"; quiet
+  echo 'from b' > "$w/b/mine.md"   # a note b's dead session left: committed, never printed as new
+  run start "$w/b"
+  [ "$(printf '%s\n' "$out" | head -1)" = "memory-sync: lines added to MEMORY.md since this session loaded it:" ] \
+    || fail "no header line: '$out'"
+  [ "$(printf '%s\n' "$out" | tail -n +2)" = '- [New](new.md) - from a' ] || fail "not the new line alone: '$out'"
+  on_remote mine.md
+  run start "$w/b"; quiet          # nothing new the second time
+}
+
 t_both_add() {
   echo a > "$w/a/from-a.md"
   echo b > "$w/b/from-b.md"
@@ -170,11 +185,24 @@ t_rules_dirty() {
   git -C "$r" checkout -q -- hooks/memory-sync
   out=$("$r/hooks/memory-sync" start "$w/a") || fail "exit $?"
   quiet
+  # The pull runs in the background: wait for it, at most 5 s
+  for _ in 1 2 3 4 5 6 7 8 9 10; do [ -f "$r/new.md" ] && break; sleep 0.5; done
   [ -f "$r/new.md" ] || fail "a clean rules repo was not pulled"
 }
 
+# The rules pull runs in the background with its output closed: a rules remote that hangs doesn't hold up start
+t_rules_slow() {
+  local r=$w/rules t0
+  make_rules "$r"
+  git -C "$r" remote set-url origin ssh://tech@192.0.2.1/x
+  t0=$SECONDS
+  out=$(MEMORY_SYNC_TIMEOUT=4 "$r/hooks/memory-sync" start "$w/a") || fail "exit $?"
+  [ $((SECONDS - t0)) -lt 2 ] || fail "start waited $((SECONDS - t0)) s for the rules"
+  quiet
+}
+
 [ -x "$here/hooks/memory-sync" ] || { echo "FAIL: hooks/memory-sync is missing"; exit 1; }
-for case in travels both_add died conflict delete_vs_edit mid_rebase unreachable not_a_repo locked rules_dirty; do
+for case in travels new_index both_add died conflict delete_vs_edit mid_rebase unreachable not_a_repo locked rules_dirty rules_slow; do
   setup
   "t_$case"
   echo "ok $case"

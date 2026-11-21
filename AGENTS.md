@@ -12,8 +12,9 @@ itself (`CLAUDE.md` imports them).
   source: the same point must mean the same in both, until that repo is moved onto these files. Never edit
   `wiscolabx` from here
 - **`hooks/memory-sync`** keeps a folder of memory notes (a git clone) in step between machines, as the
-  `SessionStart` and `SessionEnd` hooks; on `start` it also fast-forwards this repo's clone when that is clean. It
-  names no project either (`tests/check`). Its offline test: `tests/memory-sync-test` (ten `ok` lines), and
+  `SessionStart` and `SessionEnd` hooks; on `start` it also prints the index lines its pull added and
+  fast-forwards this repo's clone in the background when that is clean. It names no project either
+  (`tests/check`). Its offline test: `tests/memory-sync-test` (twelve `ok` lines), and
   `shellcheck` on both
 - **Behaviour** is proven by headless sessions in a test project outside `/opt/claude/admin`; the runs and their
   results are in `tests/behaviour.md`

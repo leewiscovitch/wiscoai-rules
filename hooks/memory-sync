@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 # Keeps a folder of Claude Code memory notes, a git clone, in step with its remote. Run as two session hooks:
-#   memory-sync start <memory-dir>   (SessionStart) commit what a session left, pull, push; then update the rules
+#   memory-sync start <memory-dir>   (SessionStart) commit what a session left, pull, push; print the index lines
+#                                    the pull added (the session read MEMORY.md before this hook ran); update the
+#                                    rules in the background (the session has read them already too)
 #   memory-sync end <memory-dir>     (SessionEnd)   commit, pull, push
 # Promises: exits 0 always; never slow (every network step under MEMORY_SYNC_TIMEOUT seconds, default 5); never
 # loses a note (no reset, no clean, no forced push: on a conflict the local commits stay and `start` prints one line
-# beginning "memory-sync: notes out of sync"). Nothing else on stdout: a hook's stdout goes into the session.
+# beginning "memory-sync: notes out of sync"). A hook's stdout goes into the session: besides that line, only the
+# lines a pull added to MEMORY.md, after a header line.
 set -u
 
 T=${MEMORY_SYNC_TIMEOUT:-5}
@@ -55,6 +58,16 @@ sync() {
   fi
 }
 
+# The lines of MEMORY.md that came in between two commits, after a header line; nothing when there are none
+new_index_lines() { # <old commit>
+  local added
+  added=$(git -C "$dir" diff --no-color --no-ext-diff -U0 "$1" HEAD -- MEMORY.md 2>/dev/null \
+    | sed -n '/^+++ /d; s/^+//p')
+  [ -n "$added" ] || return 0
+  echo "memory-sync: lines added to MEMORY.md since this session loaded it:"
+  printf '%s\n' "$added"
+}
+
 # The rules repo this script lives in: fast-forward only, and only when nothing is being worked on in it
 update_rules() {
   local rules rgit
@@ -68,8 +81,10 @@ update_rules() {
 }
 
 main() {
-  local mode=${1:-} rc=0
+  local mode=${1:-} rc=0 before
   dir=${2:-}
+  # Internal: the rules update, started by `start` as its own detached process
+  [ "$mode" = rules ] && { update_rules; return 0; }
   case $mode in start|end) ;; *) return 0 ;; esac
 
   # Not a clone (yet): nothing to do, nothing created
@@ -79,9 +94,11 @@ main() {
     if flock -w "$T" 9; then
       abort_rebase
       commit_all
+      before=$(git -C "$dir" rev-parse -q --verify HEAD 2>/dev/null) || before=
       sync || rc=$?
       # One retry when another host pushed between our fetch and our push
       [ "$rc" -ne 3 ] || { rc=0; sync || rc=$?; }
+      [ "$mode" != start ] || [ -z "$before" ] || new_index_lines "$before"
       if [ "$rc" -eq 1 ] && [ "$mode" = start ]; then
         echo "memory-sync: notes out of sync on $host in $dir: the local notes are committed but conflict with" \
           "the remote's; nothing was lost. Tell the owner; to merge by hand: git -C $dir pull --rebase"
@@ -90,7 +107,11 @@ main() {
     exec 9>&-
   fi
 
-  [ "$mode" = start ] && update_rules
+  # In the background, detached, every output closed: the hook returns without waiting for it (a hook's caller
+  # waits until its stdout is closed). The session has loaded the rules already: a pull helps the next one
+  if [ "$mode" = start ]; then
+    setsid -f "$(readlink -f "$0")" rules </dev/null >/dev/null 2>&1 || true
+  fi
   return 0
 }
 

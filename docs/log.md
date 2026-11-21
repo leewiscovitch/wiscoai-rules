@@ -2,6 +2,21 @@
 
 Newest first. Each entry: what was done, what's next (where, which model).
 
+## 2026-11-21: `memory-sync start`: the new index lines, the rules in the background
+
+Done (`wiscolabx` plan `2026-11-20-shared-rules-memory.md` Task 4, Step 6, on `admin`, model opus). Seen live:
+Claude Code reads `MEMORY.md` and the imported rules **before** the `SessionStart` hook runs, so a note pulled at
+start reached the index one session late, and the rules pull (~0.7 s) only ever helped the next session while
+holding up this one (`start` ~1.4 s on a machine that pulls the rules over SSH).
+- `start` prints the lines its pull added to `MEMORY.md`, after the header `memory-sync: lines added to MEMORY.md
+  since this session loaded it:` (a hook's output reaches the session; checked with a headless session)
+- The rules pull runs detached (`setsid -f`, the script again in an internal `rules` mode, every output closed):
+  `start` ~0.7 s
+- `tests/memory-sync-test`: twelve cases (`new_index`; `rules_slow`, which the old script failed at 4 s;
+  `rules_dirty` waits for the background pull). `shellcheck` clean, `tests/check` passes. `README.md`, `AGENTS.md`
+
+Next: back in `wiscolabx`: plan Task 4, Steps 6 and 7 finish in the same session.
+
 ## 2026-11-20: `memory.md`, behaviour run 7
 
 Done (`wiscolabx` plan `2026-11-20-shared-rules-memory.md` Task 2, on `admin`, model opus):
